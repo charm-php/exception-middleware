@@ -13,7 +13,7 @@ use Throwable;
  * A simple middleware that captures exceptions thrown in later middlewares or the request handler,
  * and renders the exception with a stack trace.
  */
-class ExceptionsMiddleware implements MiddlewareInterface {
+class ExceptionMiddleware implements MiddlewareInterface {
     use InjectedResponseFactory;
     use InjectedStreamFactory;
 
