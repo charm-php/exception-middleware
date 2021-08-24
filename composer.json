@@ -1,0 +1,21 @@
+{
+    "name": "charm/exception-middleware",
+    "description": "Provides a PSR-15 Middleware which traps exceptions and renders a nice error page.",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Charm\\Middleware\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Frode Børli",
+            "email": "frode@ennerd.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "charm/interop": "^0.0.1"
+    }
+}
