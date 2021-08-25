@@ -13,20 +13,35 @@ use Throwable;
  * A simple middleware that captures exceptions thrown in later middlewares or the request handler,
  * and renders the exception with a stack trace.
  */
-class ExceptionsMiddleware implements MiddlewareInterface {
+class ExceptionMiddleware implements MiddlewareInterface {
+    const DEFAULT_OPTIONS = [
+        /**
+         * Closure(\Throwable $e): ?ResponseInterface
+         * 
+         * This closure may return a Response to override the error page. If it returns
+         * null, the built in error page is shown.
+         */
+        'error_handler' => null,
+    ];
+
     use InjectedResponseFactory;
     use InjectedStreamFactory;
 
-    public function __construct(callable $errorHandler = null) {
-        $this->errorHandler = $errorHandler;
+    protected array $options;
+
+    public function __construct(array $options = []) {
+        $this->options = $options + self::DEFAULT_OPTIONS;
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $next): ResponseInterface {
         try {
             return $next->handle($request);
         } catch (Throwable $e) {
-            if ($this->errorHandler) {
-                return ($this->errorHandler)($e);
+            if (!empty($this->options['error_handler'])) {
+                $result =  ($this->options['error_handler'])($e);
+                if ($result !== null) {
+                    return $result;
+                }
             }
 
             $className = get_class($e);
