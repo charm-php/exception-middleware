@@ -17,7 +17,7 @@ class ExceptionMiddleware implements MiddlewareInterface {
     const DEFAULT_OPTIONS = [
         /**
          * Closure(\Throwable $e): ?ResponseInterface
-         * 
+         *
          * This closure may return a Response to override the error page. If it returns
          * null, the built in error page is shown.
          */
@@ -42,6 +42,14 @@ class ExceptionMiddleware implements MiddlewareInterface {
                 if ($result !== null) {
                     return $result;
                 }
+            }
+
+            if (key_exists($e->getCode(), \Charm\Error\HttpCodes::PHRASES)) {
+                $phrase = \Charm\Error\HttpCodes::PHRASES[$e->getCode()];
+                $code = $e->getCode();
+            } else {
+                $phrase = "Internal Server Error";
+                $code = 500;
             }
 
             $className = get_class($e);
@@ -90,9 +98,17 @@ class ExceptionMiddleware implements MiddlewareInterface {
                     content: "code";
                     font-size: 0.2em;
                 }
+                .phrase-thing {
+                    position: absolute;
+                    top: 0.5em;
+                    left: 1em;
+                    font-size: 2em;
+                    color: #fff;
+                    font-style: italic;
+                }
                 h1 {
                     background-color: #aa2244;
-                    padding: 2em 1em 1em 1em;
+                    padding: 2.5em 1em 1em 1em;
                     margin: 0;
                     color: white;
                 }
@@ -188,6 +204,7 @@ class ExceptionMiddleware implements MiddlewareInterface {
                 }
                 </style>
                     <div class="code-thing">{$errorCode}</div>
+                    <div class="phrase-thing">{$code} {$phrase}</div>
                     <h1><small><strong>{$className}</strong> thrown in <strong>{$filename}</strong> on line <strong>{$lineNumber}</strong></small>{$e->getMessage()}</h1>
                     <p>An exception occurred in file <strong>{$filename}</strong> on line <strong>{$lineNumber}</strong></p>
                     <div class="stackTrace">
@@ -196,16 +213,15 @@ class ExceptionMiddleware implements MiddlewareInterface {
                             <div class="path">{$filename}</div>
                             <div class="line">{$lineNumber}</div>
                             <div class="call"><span class='call-line'>{$lineNumber}</span><em>throw new {$className}({$quotedMessage}{$errorCodeOrDots});</em></div>
-                        </div>                    
+                        </div>
                         {$stackTrace}
                     </div>
-                    
                 </body>
             </html>
             EOT;
 
             return $this->responseFactory()
-            ->createResponse(500, 'Internal Server Error')
+            ->createResponse($code, $phrase)
             ->withAddedHeader('Content-Type', 'text/html; charset=utf-8')
             ->withAddedHeader('Cache-Control', 'no-cache')
             ->withBody($this->streamFactory()->createStream($body));
