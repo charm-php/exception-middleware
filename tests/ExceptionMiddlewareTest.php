@@ -100,6 +100,23 @@ final class ExceptionMiddlewareTest extends TestCase {
         $this->assertSame(500, $this->seen['status']);
     }
 
+    public function testSuccessOrRedirectCodeFallsBackTo500(): void {
+        $this->process(new ExceptionMiddleware(), $this->handlerThrowing(new Exception('x', 302)));
+
+        $this->assertSame(500, $this->seen['status']);
+    }
+
+    public function testMessageAndTraceAreEscaped(): void {
+        $this->process(new ExceptionMiddleware(), $this->handlerThrowing($this->makeExceptionWithArgument('<script>alert(1)</script>')));
+
+        $this->assertStringNotContainsString('<script>', $this->seen['body']);
+        $this->assertStringContainsString('&lt;script&gt;alert(1)&lt;/script&gt;', $this->seen['body']);
+    }
+
+    private function makeExceptionWithArgument(string $argument): Exception {
+        return (fn(string $message) => new Exception($message))($argument);
+    }
+
     public function testErrorHandlerResponseOverridesErrorPage(): void {
         $custom = $this->createStub(ResponseInterface::class);
         $caught = null;

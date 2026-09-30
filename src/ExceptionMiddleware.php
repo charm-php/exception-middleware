@@ -44,7 +44,7 @@ class ExceptionMiddleware implements MiddlewareInterface {
                 }
             }
 
-            if (key_exists($e->getCode(), \Charm\Error\HttpCodes::PHRASES)) {
+            if ($e->getCode() >= 400 && key_exists($e->getCode(), \Charm\Error\HttpCodes::PHRASES)) {
                 $phrase = \Charm\Error\HttpCodes::PHRASES[$e->getCode()];
                 $code = $e->getCode();
             } else {
@@ -52,10 +52,10 @@ class ExceptionMiddleware implements MiddlewareInterface {
                 $code = 500;
             }
 
-            $className = get_class($e);
-            $filename = $e->getFile();
+            $className = htmlspecialchars(get_class($e));
+            $filename = htmlspecialchars($e->getFile());
             $lineNumber = $e->getLine();
-            $stackTrace = $e->getTraceAsString();
+            $stackTrace = htmlspecialchars($e->getTraceAsString());
             $errorCode = $e->getCode();
             $message = htmlspecialchars($e->getMessage());
             $quotedMessage = htmlspecialchars(json_encode($e->getMessage()));
@@ -205,7 +205,7 @@ class ExceptionMiddleware implements MiddlewareInterface {
                 </style>
                     <div class="code-thing">{$errorCode}</div>
                     <div class="phrase-thing">{$code} {$phrase}</div>
-                    <h1><small><strong>{$className}</strong> thrown in <strong>{$filename}</strong> on line <strong>{$lineNumber}</strong></small>{$e->getMessage()}</h1>
+                    <h1><small><strong>{$className}</strong> thrown in <strong>{$filename}</strong> on line <strong>{$lineNumber}</strong></small>{$message}</h1>
                     <p>An exception occurred in file <strong>{$filename}</strong> on line <strong>{$lineNumber}</strong></p>
                     <div class="stackTrace">
                         <div class="trace first">
