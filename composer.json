@@ -16,7 +16,7 @@
     ],
     "minimum-stability": "stable",
     "require": {
-        "charm/interop": "^0.0.1",
+        "charm/interop": "^0.0.2",
         "charm/error": "^1.0",
         "psr/http-message": "^1.0 || ^2.0",
         "psr/http-server-middleware": "^1.0"
